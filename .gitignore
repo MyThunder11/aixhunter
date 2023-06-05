@@ -1,0 +1,11 @@
+# Environment
+.env
+
+# Mac/OSX
+.DS_Store
+
+# Jupyter Notebook
+.pytest_cache
+__pycache__
+*checkpoint.ipynb
+*.ipynb_checkpoints
