@@ -3,6 +3,7 @@
 
 # Raw Data
 data/*
+model/*
 
 # Mac/OSX
 .DS_Store
