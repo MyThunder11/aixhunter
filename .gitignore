@@ -12,3 +12,6 @@ data/*
 __pycache__
 *checkpoint.ipynb
 *.ipynb_checkpoints
+
+#keys
+gcp_key.json

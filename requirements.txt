@@ -3,6 +3,11 @@ pandas==1.5.3
 scikit-learn==1.2.2
 google-cloud-bigquery
 google-cloud-storage
+matplotlib
+seaborn
+opencv-python
+colorama
+python-dotenv
 
 # Trick to install the version of Tensorflow depending on your processor: darwin == Mac, ARM == M1
 tensorflow-macos==2.10.0; sys_platform == 'darwin' and 'ARM' in platform_version # Mac M-chips
