@@ -2,14 +2,35 @@
 .env
 
 # Raw Data
-data/*
-model/*
+*.jpg
+*.jpeg
+*.jpe
+*.tiff
+*.tif
+*.png
+*.webp
+
+#Processed data
+*.npy
+*.csv
+
+# Models
+*.h5
+*.pickle
+*.pck
+*.pcl
+*.db
 
 # Mac/OSX
 .DS_Store
+*Zone.Identifier
 
 # Jupyter Notebook
 .pytest_cache
 __pycache__
 *checkpoint.ipynb
 *.ipynb_checkpoints
+
+#keys
+gcp_key.json
+
