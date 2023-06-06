@@ -2,7 +2,7 @@ import os
 from multiprocessing import Pool
 import cv2
 
-# from params import *
+from params import *
 
 from tqdm import tqdm
 import pandas as pd
@@ -37,7 +37,6 @@ def load_images_from_directory(dir_path, labels='inferred', label_mode='binary',
         shuffle=True
     )
     return dataset
-
 
 
 def image_to_df(dir_path:Path, chunk_size :int =None, chunk_number :int =None) -> tuple[np.array, np.array]:
@@ -105,7 +104,7 @@ def get_data(bucket:str, blob:str, cache_path:Path) -> np.array:
     return arr
 
 
-BUCKET_NAME = 'aixhunter_processed'
+
 filepath_images = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "raw")
 filepath_processed = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "processed", "REAL")
 

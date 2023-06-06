@@ -3,6 +3,14 @@
 
 # Raw Data
 data/*
+*.jpg
+*.jpeg
+*.jpe
+*.tiff
+*.tif
+*.png
+*.webp
+
 
 # Mac/OSX
 .DS_Store
