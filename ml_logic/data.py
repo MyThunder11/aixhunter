@@ -103,7 +103,6 @@ def get_data(bucket:str, blob:str, cache_path:Path) -> np.array:
     return arr
 
 
-
 if __name__ == '__main__':
     filepath_images = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "raw")
     filepath_processed = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "processed", "REAL")

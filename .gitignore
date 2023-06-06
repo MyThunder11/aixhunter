@@ -15,6 +15,14 @@
 *.csv
 
 
+
+# Models
+.h5
+.pickle
+.pck
+.pcl
+.db
+
 # Mac/OSX
 .DS_Store
 *Zone.Identifier
