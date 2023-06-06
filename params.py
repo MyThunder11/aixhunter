@@ -2,6 +2,5 @@ import os
 import numpy as np
 
 ##################  VARIABLES  ##################
-BUCKET_NAME = os.environ.get("BUCKET_NAME")
-
+BUCKET_NAME = 'aixhunter_processed'
 ##################  CONSTANTS  #####################

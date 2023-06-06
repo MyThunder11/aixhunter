@@ -2,7 +2,6 @@
 .env
 
 # Raw Data
-data/*
 *.jpg
 *.jpeg
 *.jpe
@@ -11,9 +10,14 @@ data/*
 *.png
 *.webp
 
+#Processed data
+*.npy
+*.csv
+
 
 # Mac/OSX
 .DS_Store
+*Zone.Identifier
 
 # Jupyter Notebook
 .pytest_cache

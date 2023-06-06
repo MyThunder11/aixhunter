@@ -12,9 +12,7 @@ from colorama import Fore, Style
 from google.cloud import storage, exceptions
 
 from tensorflow.keras.utils import image_dataset_from_directory
-#from dotenv import load_dotenv
-
-# load_dotenv()
+from tensorflow.data import Dataset
 
 
 
@@ -27,7 +25,8 @@ def download_bucket_objects(bucket_name:str, local_path:Path) -> None:
     return None
 
 
-def load_images_from_directory(dir_path, labels='inferred', label_mode='binary', image_size=(32, 32), batch_size=32):
+def load_images_from_directory(dir_path:Path, labels:str ='inferred', label_mode:str ='binary'
+                               , image_size:tuple =(32, 32), batch_size:int =32) -> Dataset:
     dataset = image_dataset_from_directory(
         directory=dir_path,
         labels=labels,
@@ -105,13 +104,6 @@ def get_data(bucket:str, blob:str, cache_path:Path) -> np.array:
 
 
 
-filepath_images = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "raw")
-filepath_processed = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "processed", "REAL")
-
-
-""" for i in range(50):
-    images, y = image_to_df(filepath_images, 1000, i)
-    save_df(images, y, filepath_processed, 1000, i)
- """
-
-load_images_from_directory(filepath_images)
+if __name__ == '__main__':
+    filepath_images = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "raw")
+    filepath_processed = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "data", "processed", "REAL")
