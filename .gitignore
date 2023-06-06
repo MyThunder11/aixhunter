@@ -14,8 +14,6 @@
 *.npy
 *.csv
 
-
-
 # Models
 *.h5
 *.pickle
@@ -35,3 +33,4 @@ __pycache__
 
 #keys
 gcp_key.json
+
