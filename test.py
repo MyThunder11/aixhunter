@@ -27,9 +27,6 @@ def post_test():
     imgdata = base64.b64decode(encoded_string.encode('utf-8'))
     Image.open(io.BytesIO(imgdata)).save('test.jpeg')
 
-
-
-
 def decode_test():
     with open('base64.txt', 'r') as f:
         img_64 = f.read()

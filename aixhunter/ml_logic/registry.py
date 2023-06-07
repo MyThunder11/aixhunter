@@ -62,6 +62,6 @@ def load_latest_model() -> tf.keras.Model:
         blob.download_to_filename(model_file)
         print('Latest model downloaded')
     else:
-        print('Loading modle from cache')
+        print('Loading model from cache')
     model = tf.keras.models.load_model(model_file)
     return model
