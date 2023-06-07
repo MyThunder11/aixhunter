@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 import base64
 import json
+import requests
 
 
 
@@ -34,16 +35,15 @@ class Prediction(APIView):
         return Response(response_dict, status=200)
 
     def get(self, request):
-        # If given with url --> Tensorflow accpts urls
-        if request.GET.get('method') == 'url':
-            image = request.GET.get('url')
-        # If given in Base64 --> provide image
-        elif request.GET.get('method') == 'file':
-            pass
-        else:
-            return Response(status=400)
+        # If given with url --> Tensorflow accepts urls
+        try:
+            image_url = request.GET.get('url')
+            response = requests.get(image_url)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            return Response({'error': str(e)}, status=400)
         model = ApiConfig.model
-        score = pred(model, image)
+        score = pred(model, image_url)
         prediction = 1 if score >= 0.99 else 0
         response_dict = {"Prediction": prediction, "Score": score}
         print(response_dict)
