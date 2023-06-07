@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+from PIL import Image
+from io import BytesIO
 from .apps import *
 from aixhunter.interface_model.main import pred
 from rest_framework.views import APIView
@@ -28,10 +30,11 @@ class Prediction(APIView):
             # If given in Base64 --> provide image
             elif request.GET.get('method') == 'b64':
                 b64_img = request.GET.get('data')
-                print(b64_img)
-                image = base64.decodebytes(b64_img)
+                image = Image.open(BytesIO(base64.b64decode(b64_img)))
             elif request.GET.get('method') == 'file':
                 pass
+            else:
+                return Response(status=400)
             model = ApiConfig.model
             score = pred(model, image)
             prediction = 1 if score >= 0.99 else 0
