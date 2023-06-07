@@ -35,4 +35,8 @@ def decode_test():
     print(type(image))
     print(isinstance(image, JpegImagePlugin.JpegImageFile))
 
-post_test()
+def test_forbidden():
+    scrap_url = 'https://webtoon-phinf.pstatic.net/20230215_68/1676406944721ykbfR_JPEG/6HelloBaby_thumbnail_desktop.jpg?type=a210'
+    url = "http://localhost:8000"
+    response = requests.get(url, params={'url': scrap_url})
+    return response.content, response.status_code
