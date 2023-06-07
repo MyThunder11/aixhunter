@@ -3,7 +3,7 @@ import tensorflow as tf
 import validators
 from pathlib import Path
 
-from ml_logic import registry
+from aixhunter.ml_logic import registry
 
 def train():
     pass
@@ -22,8 +22,7 @@ def pred(model:tf.keras.Model, img_path:Path) -> tuple[float, float]:
     img_array = tf.keras.utils.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0) # Create a batch
     predictions = model.predict(img_array)
-    score = tf.nn.sigmoid(predictions)
-    return float(predictions), float(score)
+    return float(predictions)
 
 
 

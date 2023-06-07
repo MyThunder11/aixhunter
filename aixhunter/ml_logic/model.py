@@ -109,27 +109,8 @@ def evaluate_model(
     Evaluate trained model performance on the dataset
     """
 
-    print(Fore.BLUE + f"\nEvaluating model on {len(X)} rows..." + Style.RESET_ALL)
 
-    if model is None:
-        print(f"\n❌ No model to evaluate")
-        return None
-
-    metrics = model.evaluate(
-        x=X,
-        y=y,
-        batch_size=batch_size,
-        verbose=0,
-        # callbacks=None,
-        return_dict=True
-    )
-
-    loss = metrics["loss"]
-    mae = metrics["mae"]
-
-    print(f"✅ Model evaluated, MAE: {round(mae, 2)}")
-
-    return metrics
+    return None
 
 if __name__ == '__main__':
     model = build_model()
