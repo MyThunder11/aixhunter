@@ -1,23 +1,38 @@
 import requests
+import json
 import base64
-from PIL import Image
-from io import BytesIO
+from PIL import Image, JpegImagePlugin
+import io
 
 
-url = 'http://127.0.0.1:8000/'
+def post_test():
+    # Load an image and convert it to base64
+    with open("szAKSQPN.jpg", "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
 
-params = {'url': 'https://cdn.wamda.com/feature-images/53ce9644a32beb0.png',
-          'method': 'url'}
+    """ with open('base64.txt', 'r') as image_text:
+        encoded_string = image_text.read() """
 
-params_2 = {'method': 'b64',
-            'data': '' }
+    # Specify the url of your Django server
+    url = "http://localhost:8000"
 
+    # Format the data as JSON
+    data = json.dumps({"image": encoded_string})
 
-#r = requests.get(url, params=params_2)
+    # Send a POST request to the server
+    response = requests.post(url, data=data, headers={'Content-Type': 'application/json'})
 
+    # Print out the response from the server
+    print(response.content)
+    imgdata = base64.b64decode(encoded_string.encode('utf-8'))
+    Image.open(io.BytesIO(imgdata)).save('test.jpeg')
 
-b64_img = '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgACADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDhQop+2kztUkgnHpVYXVxJdrCtoyR9WkkYdPYCu25w2Le2kK06ii4iPkKTioo5XM+xl+XHBxU69KXvSsMUCgilzQaAP//Z'
-payload ={"filename": "photo.jpeg", "filedata": b64_img}
-resp = requests.get(url=url, params=params)
+def decode_test():
+    with open('base64.txt', 'r') as f:
+        img_64 = f.read()
+    imgdata = base64.b64decode(img_64)
+    image = Image.open(io.BytesIO(imgdata))
+    print(type(image))
+    print(isinstance(image, JpegImagePlugin.JpegImageFile))
 
-print(resp.content)
+post_test()
