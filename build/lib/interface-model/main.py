@@ -14,6 +14,7 @@ def evaluate():
 
 def pred(model:tf.keras.Model, img_path:Path) -> tuple[float, float]:
     """Returns a score and confidence interval based on the model and a url / path"""
+    breakpoint()
     if validators.url(img_path):
         img_path = tf.keras.utils.get_file(origin=img_path)
     else:

@@ -34,3 +34,8 @@ __pycache__
 #keys
 gcp_key.json
 
+#database
+*.sqlite3
+
+# egg
+*.egg-info
