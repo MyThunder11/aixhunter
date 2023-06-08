@@ -21,13 +21,15 @@ class Prediction(APIView):
         - A base64 image (either raw or with html tags)
         - A URL pointing to an image
         """
-
+        allowed_extensions = ['.jpg', '.jpeg', '.jpe', '.png', '.bmp', '.gif']
         # If the request contains an image file
         if 'file' in request.FILES:
             image = request.FILES.get('file')
             try:
                 # Get the file extension of the image
                 file_extension = os.path.splitext(image.name)[1]
+                if file_extension.lower() not in allowed_extensions:
+                    return Response({'error': f'file format not supported, please use one of {allowed_extensions}'}, status=400)
                 path = f'temp{file_extension}'
                 # Save the image locally
                 with open(path, 'wb') as saved_file:
@@ -48,13 +50,21 @@ class Prediction(APIView):
                     response = requests.get(path)
                     response.raise_for_status()
                     img_data = response.content
-                    file_extension = os.path.splitext(response.url)[1]
-                    path = f'temp{file_extension}'
-                    with open(path, 'wb') as handler:
-                        handler.write(img_data)
                 except requests.exceptions.RequestException as e:
                     # Return an error response if there's any exception
                     return Response({'error': str(e)}, status=400)
+
+                try:
+                    # Check for file extension
+                    file_extension = os.path.splitext(response.url)[1]
+                    file_extension = '.jpeg' if file_extension == '' else file_extension
+                    assert file_extension.lower() in allowed_extensions
+                except:
+                    return Response({'error': f'file format not supported, please use one of {allowed_extensions}'}, status=400)
+                #Write image
+                path = f'temp{file_extension}'
+                with open(path, 'wb') as handler:
+                    handler.write(img_data)
             else:
                 # If the request contains a base64 image
                 base64_image = request.data.get('url')
@@ -68,14 +78,19 @@ class Prediction(APIView):
                     # Convert the bytes into an image
                     image = Image.open(io.BytesIO(imgdata))
                     # Get the format of the image (e.g. 'png', 'jpg')
-                    file_extension = image.format.lower()
+                    file_extension =  '.' + image.format.lower()
                     # Save the image locally
-                    path = f'temp.{file_extension}'
+                    path = f'temp{file_extension}'
                     image.save(path)
+                    if file_extension.lower() not in allowed_extensions:
+                        return Response({'error': f'file format not supported, please use one of {allowed_extensions}'}, status=400)
                 except Exception as e:
                     # Return an error response if there's any exception
                     return Response({'error': str(e)}, status=400)
-
+        try:
+            Image.open(path).verify()
+        except Exception as e:
+            return Response({"Invalid image": str(e)[:-12]})
         # Make a prediction using the model
         score = pred(ApiConfig.model , path)
         # If the score is 0.99 or higher, the prediction is 1; otherwise, it's 0
@@ -85,20 +100,39 @@ class Prediction(APIView):
         # Return the response dictionary
         return Response(response_dict, status=200)
 
+
+
     def get(self, request):
         """Return prediction file format through GET.
         The incoming GET request should contain a URL pointing to an image.
         """
+        allowed_extensions = ['.jpg', '.jpeg', '.jpe', '.png', '.bmp', '.gif']
         try:
             # Get the URL from the request
             image_url = request.GET.get('url')
             # Make a GET request to the URL
             response = requests.get(image_url)
             response.raise_for_status()
+            img_data = response.content
         except requests.exceptions.RequestException as e:
             # Return an error response if there's any exception
             return Response({'error': str(e)}, status=400)
 
+        try:
+            # Check for file extension
+            file_extension = os.path.splitext(response.url)[1]
+            file_extension = '.jpeg' if file_extension == '' else file_extension
+            assert file_extension.lower() in allowed_extensions
+        except:
+            return Response({'error': f'file format not supported, please use one of {allowed_extensions}'}, status=400)
+        #Write image
+        path = f'temp{file_extension}'
+        with open(path, 'wb') as handler:
+            handler.write(img_data)
+        try:
+            Image.open(path).verify()
+        except Exception as e:
+            return Response({"Invalid image": str(e)[:-12]})
         # Use the model to make a prediction
         model = ApiConfig.model
         score = pred(model, image_url)

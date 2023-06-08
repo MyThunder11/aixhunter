@@ -24,7 +24,7 @@ def post_b64_test():
     response2 = requests.post(url, data=data2, headers={'Content-Type': 'application/json'})
 
     # Print out the response from the server
-    return response.content, response.status_code #, response2.content, response2.status_code
+    return response.content, response.status_code, response2.content, response2.status_code
 
 def post_img_test():
     # define URL
@@ -41,6 +41,18 @@ def post_url():
     url = "http://localhost:8000"
 
     scrape_url = 'https://miro.medium.com/v2/resize:fit:1400/0*EAwg7WIIMhgnSfLf.png'
+
+    # Send a POST request to the server
+    response = requests.post(url, data={'url':scrape_url})
+
+    # Print out the response from the server
+    return response.content
+
+def post_non_image_url():
+    # define URL
+    url = "http://localhost:8000"
+
+    scrape_url = 'https://www.geeksforgeeks.org/python-os-path-splitext-method/'
 
     # Send a POST request to the server
     response = requests.post(url, data={'url':scrape_url})
@@ -73,3 +85,4 @@ print(post_b64_test())
 print(post_url())
 print(get_url())
 print(test_forbidden())
+print(post_non_image_url())
