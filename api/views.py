@@ -9,47 +9,95 @@ from rest_framework.response import Response
 import base64
 import json
 import requests
+import validators
 
 
 
 class Prediction(APIView):
     def post(self, request):
+        """Return prediction file format through POST.
+        The incoming POST request can be one of the following:
+        - An image file
+        - A base64 image (either raw or with html tags)
+        - A URL pointing to an image
+        """
+
+        # If the request contains an image file
         if 'file' in request.FILES:
-            image = request.FILES['file']
+            image = request.FILES.get('file')
             try:
+                # Get the file extension of the image
                 file_extension = os.path.splitext(image.name)[1]
                 path = f'temp{file_extension}'
+                # Save the image locally
                 with open(path, 'wb') as saved_file:
                     saved_file.write(image.read())
-                    print('image saved locally')
+                print('image saved locally')
             except Exception as e:
+                # Return an error response if there's any exception
                 return Response({'error': str(e)}, status=400)
-        else:
-            base64_image = request.data['image']  # 'image' is the key in the JSON object
-            if base64_image is None:
-                return Response({'error': 'No image found'}, status=400)
-            try:
-                # base64_image = base64_image.split(',')[1] # a rétintégrer en fonction du format reçu
-                imgdata = base64.b64decode(base64_image)
-                image = Image.open(io.BytesIO(imgdata))
-                file_extension = image.format.lower()
-                path = f'temp.{file_extension}'
-                image.save(path)
-            except Exception as e:
-                return Response({'error': str(e)}, status=400)
+
+        # If the request contains a URL
+        elif 'url' in request.data:
+            data = request.data.get('url')
+
+            # If the URL is valid
+            if validators.url(data):
+                try:
+                    path = data
+                    # Test the url for forbidden
+                    import pdb; pdb.set_trace()
+                    response = requests.get(path)
+                    response.raise_for_status()
+                except requests.exceptions.RequestException as e:
+                    # Return an error response if there's any exception
+                    return Response({'error': str(e)}, status=400)
+            else:
+                # If the request contains a base64 image
+                base64_image = request.data.get('url')
+                if base64_image is None:
+                    return Response({'error': 'No image found'}, status=400)
+                try:
+                    # If the base64 image string has a comma, take everything after it
+                    base64_image = base64_image.split(',')[1] if ',' in base64_image else base64_image
+                    # Decode the base64 image string into bytes
+                    imgdata = base64.b64decode(base64_image)
+                    # Convert the bytes into an image
+                    image = Image.open(io.BytesIO(imgdata))
+                    # Get the format of the image (e.g. 'png', 'jpg')
+                    file_extension = image.format.lower()
+                    # Save the image locally
+                    path = f'temp.{file_extension}'
+                    image.save(path)
+                except Exception as e:
+                    # Return an error response if there's any exception
+                    return Response({'error': str(e)}, status=400)
+
+        # Make a prediction using the model
         score = pred(ApiConfig.model , path)
+        # If the score is 0.99 or higher, the prediction is 1; otherwise, it's 0
         prediction = 1 if score >= 0.99 else 0
+        # Prepare the response dictionary
         response_dict = {"Prediction": prediction, "Score": score}
+        # Return the response dictionary
         return Response(response_dict, status=200)
 
     def get(self, request):
-        # If given with url --> Tensorflow accepts urls
+        """Return prediction file format through GET.
+        The incoming GET request should contain a URL pointing to an image.
+        """
+
         try:
+            # Get the URL from the request
             image_url = request.GET.get('url')
+            # Make a GET request to the URL
             response = requests.get(image_url)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
+            # Return an error response if there's any exception
             return Response({'error': str(e)}, status=400)
+
+        # Use the model to make a prediction
         model = ApiConfig.model
         score = pred(model, image_url)
         prediction = 1 if score >= 0.99 else 0
