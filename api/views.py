@@ -40,15 +40,18 @@ class Prediction(APIView):
         # If the request contains a URL
         elif 'url' in request.data:
             data = request.data.get('url')
-
             # If the URL is valid
             if validators.url(data):
                 try:
                     path = data
                     # Test the url for forbidden
-                    import pdb; pdb.set_trace()
                     response = requests.get(path)
                     response.raise_for_status()
+                    img_data = response.content
+                    file_extension = os.path.splitext(response.url)[1]
+                    path = f'temp{file_extension}'
+                    with open(path, 'wb') as handler:
+                        handler.write(img_data)
                 except requests.exceptions.RequestException as e:
                     # Return an error response if there's any exception
                     return Response({'error': str(e)}, status=400)
@@ -86,7 +89,6 @@ class Prediction(APIView):
         """Return prediction file format through GET.
         The incoming GET request should contain a URL pointing to an image.
         """
-
         try:
             # Get the URL from the request
             image_url = request.GET.get('url')
