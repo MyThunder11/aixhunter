@@ -13,7 +13,7 @@ def post_b64_test():
     encoded_string_2= "data:image/png;base64, " + encoded_string
 
     # Specify the url of your Django server
-    url = "http://localhost:8000"
+    url = "https://testing-fwbq4znlpq-od.a.run.app/"
 
     # Format the data as JSON
     data = json.dumps({"url": encoded_string})
@@ -28,7 +28,7 @@ def post_b64_test():
 
 def post_img_test():
     # define URL
-    url = "http://localhost:8000"
+    url = "https://testing-fwbq4znlpq-od.a.run.app/"
 
     # Send a POST request to the server
     response = requests.post(url, files={'file': open("szAKSQPN.jpg", "rb")})
@@ -38,7 +38,7 @@ def post_img_test():
 
 def post_url():
     # define URL
-    url = "http://localhost:8000"
+    url = "https://testing-fwbq4znlpq-od.a.run.app/"
 
     scrape_url = 'https://miro.medium.com/v2/resize:fit:1400/0*EAwg7WIIMhgnSfLf.png'
 
@@ -50,7 +50,7 @@ def post_url():
 
 def post_non_image_url():
     # define URL
-    url = "http://localhost:8000"
+    url = "https://testing-fwbq4znlpq-od.a.run.app/"
 
     scrape_url = 'https://www.geeksforgeeks.org/python-os-path-splitext-method/'
 
@@ -62,7 +62,7 @@ def post_non_image_url():
 
 def get_url():
     # define URL
-    url = "http://localhost:8000"
+    url = "https://testing-fwbq4znlpq-od.a.run.app/"
 
     scrape_url = 'https://encrypted-tbn3.gstatic.com/licensed-image?q=tbn:ANd9GcTaKwXwvWoHu-pc_K4jXH9JpA1KIvo21RYoWoUFpzZncXr6PzR8om5tr6R3CY77s1NzuVuH8ItRH9lSsRw'
 
@@ -76,7 +76,7 @@ def get_url():
 
 def test_forbidden():
     scrap_url = 'https://webtoon-phinf.pstatic.net/20230215_68/1676406944721ykbfR_JPEG/6HelloBaby_thumbnail_desktop.jpg?type=a210'
-    url = "http://localhost:8000"
+    url = "https://testing-fwbq4znlpq-od.a.run.app/"
     response = requests.post(url,  data={'url': scrap_url})
     return response.content, response.status_code
 
