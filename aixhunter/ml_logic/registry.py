@@ -52,7 +52,7 @@ def load_latest_model() -> tf.keras.Model:
     blob_list = [(blob, blob.updated) for blob in storage_client.list_blobs(model_bucket)]
     latest_model_name = sorted(blob_list, key=lambda tup: tup[1])[-1][0].name
 
-    model_path = os.path.join(os.path.expanduser('~'), "code", "MyThunder11", "aixhunter", "models")
+    model_path = os.path.join(os.getcwd(), "models")
     model_file = os.path.join(model_path, latest_model_name)
 
     if not os.path.isfile(model_file):
