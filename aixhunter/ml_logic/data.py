@@ -10,7 +10,7 @@ from tensorflow.keras.utils import image_dataset_from_directory
 
 
 def load_images_from_bucket(image_bucket, labels:str ='inferred', label_mode:str ='binary'
-                               , image_size:tuple =(32, 32), batch_size:int =32):
+                               , image_size:tuple =(200, 200), batch_size:int =32):
     print('Loading images from google storage ... this might take some time ...')
     dataset = image_dataset_from_directory(
         directory=f'gs://{image_bucket}',
