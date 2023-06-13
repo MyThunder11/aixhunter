@@ -97,6 +97,7 @@ class Prediction(APIView):
         prediction = 1 if score >= 0.99 else 0
         # Prepare the response dictionary
         response_dict = {"Prediction": prediction, "Score": score}
+        print(response_dict)
         # Return the response dictionary
         return Response(response_dict, status=200)
 

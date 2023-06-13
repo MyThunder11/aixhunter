@@ -15,7 +15,7 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-MODELS = os.path.join(BASE_DIR, 'models')
+LOCAL_MODELS_REGISTRY = os.path.join(BASE_DIR, 'models')
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,10 +25,12 @@ MODELS = os.path.join(BASE_DIR, 'models')
 SECRET_KEY = 'django-insecure-#458lc45l=)s9gwfvvm2vhv-ayugq5ev2$ve!)-xm^$t8xd56='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['testing-fwbq4znlpq-od.a.run.app',
-                 'http://localhost:8000']
+                 'localhost', '127.0.0.1', '0.0.0.0',
+                 '*'
+                ]
 
 
 # Application definition
@@ -57,7 +59,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5001',
+    'http://localhost', 'http://127.0.0.1', 'http://0.0.0.0',
     'https://bricechapuis.github.io',
 ]
 
