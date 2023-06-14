@@ -32,7 +32,6 @@ class Prediction(APIView):
                 # Save the image locally
                 with open(path, 'wb') as saved_file:
                     saved_file.write(image.read())
-                print('image saved locally')
             except Exception as e:
                 # Return an error response if there's any exception
                 return Response({'error': str(e)}, status=400)
