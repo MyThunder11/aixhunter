@@ -21,15 +21,13 @@ class Prediction(APIView):
         - A base64 image (either raw or with html tags)
         - A URL pointing to an image
         """
-        allowed_extensions = ['.jpg', '.jpeg', '.jpe', '.png', '.bmp', '.gif']
         # If the request contains an image file
+
         if 'file' in request.FILES:
             image = request.FILES.get('file')
             try:
                 # Get the file extension of the image
                 file_extension = os.path.splitext(image.name)[1]
-                if file_extension.lower() not in allowed_extensions:
-                    return Response({'error': f'file format not supported, please use one of {allowed_extensions}'}, status=400)
                 path = f'temp{file_extension}'
                 # Save the image locally
                 with open(path, 'wb') as saved_file:
@@ -58,9 +56,9 @@ class Prediction(APIView):
                     # Check for file extension
                     file_extension = os.path.splitext(response.url)[1]
                     file_extension = '.jpeg' if file_extension == '' else file_extension
-                    assert file_extension.lower() in allowed_extensions
+
                 except:
-                    return Response({'error': f'file format not supported, please use one of {allowed_extensions}'}, status=400)
+                    return Response({'error': f'file format not supported'}, status=400)
                 #Write image
                 path = f'temp{file_extension}'
                 with open(path, 'wb') as handler:
@@ -82,8 +80,6 @@ class Prediction(APIView):
                     # Save the image locally
                     path = f'temp{file_extension}'
                     image.save(path)
-                    if file_extension.lower() not in allowed_extensions:
-                        return Response({'error': f'file format not supported, please use one of {allowed_extensions}'}, status=400)
                 except Exception as e:
                     # Return an error response if there's any exception
                     return Response({'error': str(e)}, status=400)
@@ -91,10 +87,21 @@ class Prediction(APIView):
             Image.open(path).verify()
         except Exception as e:
             return Response({"Invalid image": str(e)[:-12]})
+        # Select which Model based on endpoint
+        if 'faces' in request.path:
+            model = ApiConfig.model_faces
+            target_size = (256, 256)
+            threshold = 0.99
+        elif 'general' in request.path:
+            model = ApiConfig.model_general
+            target_size = (200, 200)
+            threshold = 0.5
+        else:
+            return Response({'error': 'endpoint error'}, status=500)
         # Make a prediction using the model
-        score = pred(ApiConfig.model , path)
+        score = pred(model , path, target_size)
         # If the score is 0.99 or higher, the prediction is 1; otherwise, it's 0
-        prediction = 1 if score >= 0.99 else 0
+        prediction = 1 if score >= threshold else 0
         # Prepare the response dictionary
         response_dict = {"Prediction": prediction, "Score": score}
         print(response_dict)
@@ -116,7 +123,7 @@ class Prediction(APIView):
             response.raise_for_status()
             img_data = response.content
         except requests.exceptions.RequestException as e:
-            # Return an error response if there's any exception
+            # Return an error response if URL is not callable
             return Response({'error': str(e)}, status=400)
 
         try:
@@ -135,8 +142,17 @@ class Prediction(APIView):
         except Exception as e:
             return Response({"Invalid image": str(e)[:-12]})
         # Use the model to make a prediction
-        model = ApiConfig.model
-        score = pred(model, image_url)
+        # Select which Model based on endpoint
+        if 'faces' in request.path:
+            model = ApiConfig.model_faces
+            target_size = (256, 256)
+        elif 'general' in request.path:
+            model = ApiConfig.model_general
+            target_size = (200, 200)
+        else:
+            return Response({'error': 'endpoint error'}, status=500)
+        # Make a prediction using the model
+        score = pred(model , image_url, target_size)
         prediction = 1 if score >= 0.99 else 0
         response_dict = {"Prediction": prediction, "Score": score}
         print(response_dict)

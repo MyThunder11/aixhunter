@@ -1,10 +1,6 @@
 
-from multiprocessing import Pool
-
 from aixhunter.params import BUCKET_IMAGES
 
-
-# import tensorflow_datasets as tfds
 from tensorflow.keras.utils import image_dataset_from_directory
 
 

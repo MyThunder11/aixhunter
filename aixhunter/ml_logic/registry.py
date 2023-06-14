@@ -5,6 +5,7 @@ import time
 import tensorflow as tf
 from google.cloud import storage
 from aixhunter.params import *
+from aixhunter.ml_logic.model import build_model
 
 def save_results(params: dict, metrics: dict) -> None:
     """
@@ -18,7 +19,7 @@ def save_results(params: dict, metrics: dict) -> None:
 def save_model(model: tf.keras.Model, file_name:str) -> None:
     f"""
     Persist trained model locally on the hard drive in "{LOCAL_MODELS_REGISTRY}"
-    - Persist in bucket on GCS at "{BUCKET_MODELS}/TIMESTAMP.h5"
+    - Persist in bucket on GCS at "{BUCKET_FACE_MODELS}/TIMESTAMP.h5"
     """
 
     # Save model locally
@@ -26,9 +27,8 @@ def save_model(model: tf.keras.Model, file_name:str) -> None:
     model.save(model_path)  # Keras Method to save the model
 
     print("✅ Model saved locally")
-    import pdb; pdb.set_trace()
     client = storage.Client()
-    bucket = client.bucket(BUCKET_MODELS)
+    bucket = client.bucket(BUCKET_FACE_MODELS)
     blob = bucket.blob(f"{file_name}")
     blob.upload_from_filename(model_path)
 
@@ -38,7 +38,7 @@ def save_model(model: tf.keras.Model, file_name:str) -> None:
 
 
 
-def load_latest_model() -> tf.keras.Model:
+def load_latest_model(bucket: str = BUCKET_FACE_MODELS) -> tf.keras.Model:
     """
     Return a saved model:
     - locally (latest one in alphabetical order)
@@ -50,12 +50,13 @@ def load_latest_model() -> tf.keras.Model:
     """
     # Look for latest model on gcs
     storage_client = storage.Client()
-    model_bucket = BUCKET_MODELS
+    model_bucket = bucket
     blob_list = [(blob, blob.updated) for blob in storage_client.list_blobs(model_bucket)]
     latest_model_name = sorted(blob_list, key=lambda tup: tup[1])[-1][0].name
 
-    print(f'Latest model to be used: {latest_model_name}')
+    model_name = 'face' if model_bucket == BUCKET_FACE_MODELS else 'general'
 
+    print(f'Latest {model_name} model to be used: {latest_model_name}')
     model_path = os.path.join(os.getcwd(), "models")
     model_file = os.path.join(model_path, latest_model_name)
     lockfile = ".lock"
@@ -68,15 +69,19 @@ def load_latest_model() -> tf.keras.Model:
             blob = bucket.blob(latest_model_name)
             blob.download_to_filename(model_file)
             os.remove(lockfile)
-            print('Latest model downloaded')
+            print(f'Latest {model_name} model downloaded')
             break
         else:
             if os.path.isfile(lockfile):
                 print("Lockfile exists, waiting...")
                 time.sleep(10)
             else:
-                print('Loading model from cache')
+                print(f'Loading {model_name} model from cache')
                 break
-    model = tf.keras.models.load_model(model_file)
-    print("✅ Model loaded")
+    if model_bucket == BUCKET_FACE_MODELS:
+        model = tf.keras.models.load_model(model_file)
+    elif model_bucket == BUCKET_GENERAL_MODELS:
+        model = build_model()
+        model.load_weights(model_file)
+    print(f"✅ {model_name.upper()} Model loaded")
     return model

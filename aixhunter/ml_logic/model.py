@@ -5,58 +5,32 @@ from typing import Tuple
 from aixhunter.params import *
 import tensorflow as tf
 
+from aixhunter.ml_logic.data import load_images_from_bucket
 
 
-from registry import save_model
-from data import load_images_from_bucket
-
-
-def load_model_VGG16():
-    model = tf.keras.applications.VGG16(
-        weights='imagenet',  # Load weights pre-trained on ImageNet.
-        input_shape=(32, 32, 3),
-        include_top=False
-        )  # Do not include the ImageNet classifier at the top.
-    return model
-
-
-def set_nontrainable_layers(model):
+def load_model():
+    model = tf.keras.applications.ConvNeXtBase(
+        include_top=False,
+        weights="imagenet",
+        input_shape=(200, 200, 3),
+    )
     model.trainable = False
     return model
 
 
-def add_last_layers(model):
-    '''Take a pre-trained model, set its parameters as non-trainable, and add additional trainable layers on top'''
-    rescale_layer = tf.keras.layers.Rescaling(1./255, input_shape=(32, 32, 3))
-    base_model = set_nontrainable_layers(model)
-    flatten_layer = tf.keras.layers.Flatten()
-    dense_layer = tf.keras.layers.Dense(500, activation='relu')
-    prediction_layer = tf.keras.layers.Dense(1, activation='sigmoid')
-
-
-    model = tf.keras.models.Sequential([
-        rescale_layer,
-        base_model,
-        flatten_layer,
-        dense_layer,
-        prediction_layer
-    ])
-    return model
-
-
-
 def build_model():
-    model = load_model_VGG16()
-    model = add_last_layers(model)
-
-    adam = tf.keras.optimizers.Adam(learning_rate=1e-4)
-
+    model = tf.keras.Sequential([
+        tf.keras.layers.Rescaling(1./255, input_shape=(200, 200, 3)),
+        load_model(),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
     model.compile(
-        optimizer=adam,
+        optimizer='adam',
         loss='binary_crossentropy',
-        metrics=['accuracy', 'Precision', 'Recall']
+        metrics=['accuracy']
     )
-
     return model
 
 
@@ -91,12 +65,6 @@ def train_model(
         callbacks=[es],
         verbose=1
         )
-
-    print('✅ Model fitted, saving model')
-
-    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-
-    save_model(model, f"model_{timestamp}.h5")
 
     """ save_results() # Insert metrics saving here"""
     return model, history

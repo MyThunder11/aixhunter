@@ -3,7 +3,8 @@ from pathlib import Path
 import numpy as np
 
 ##################  VARIABLES  ##################
-BUCKET_MODELS = 'dn_model'
+BUCKET_FACE_MODELS = 'dn_model'
+BUCKET_GENERAL_MODELS = 'gen_model'
 BUCKET_IMAGES = 'aixhunter_data_general'
 ##################  CONSTANTS  ##################
 
