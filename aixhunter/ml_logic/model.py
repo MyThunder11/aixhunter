@@ -1,67 +1,35 @@
 import numpy as np
 import time
 import datetime
-from tensorflow import keras
-from keras import layers, models, optimizers
-from colorama import Fore, Style
 from typing import Tuple
+from aixhunter.params import *
+import tensorflow as tf
 
-# Timing the TF import
-print(Fore.BLUE + "\nLoading TensorFlow..." + Style.RESET_ALL)
-start = time.perf_counter()
-
-from tensorflow import keras
-from keras import Model, Sequential, layers, regularizers, optimizers
-from keras.callbacks import EarlyStopping
-
-from registry import save_model
-
-end = time.perf_counter()
-print(f"\n✅ TensorFlow loaded ({round(end - start, 2)}s)")
+from aixhunter.ml_logic.data import load_images_from_bucket
 
 
-def load_model_VGG16():
-    model = keras.applications.VGG16(
-        weights='imagenet',  # Load weights pre-trained on ImageNet.
-        input_shape=(256, 256, 3),
-        include_top=False
-        )  # Do not include the ImageNet classifier at the top.
-    return model
-
-
-def set_nontrainable_layers(model):
+def load_model():
+    model = tf.keras.applications.ConvNeXtBase(
+        include_top=False,
+        weights="imagenet",
+        input_shape=(200, 200, 3),
+    )
     model.trainable = False
     return model
 
 
-def add_last_layers(model):
-    '''Take a pre-trained model, set its parameters as non-trainable, and add additional trainable layers on top'''
-    rescale_layer = layers.Rescaling(1./255, input_shape=(256, 256, 3))
-    base_model = set_nontrainable_layers(model)
-    flatten_layer = layers.Flatten()
-    dense_layer = layers.Dense(500, activation='relu')
-    prediction_layer = layers.Dense(1, activation='sigmoid')
-
-
-    model = models.Sequential([
-        rescale_layer,
-        base_model,
-        flatten_layer,
-        dense_layer,
-        prediction_layer
-    ])
-    return model
-
 def build_model():
-    model = load_model_VGG16()
-    model = add_last_layers(model)
-
-    adam = optimizers.Adam(learning_rate=1e-4)
-
+    model = tf.keras.Sequential([
+        tf.keras.layers.Rescaling(1./255, input_shape=(200, 200, 3)),
+        load_model(),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
     model.compile(
-        optimizer=adam,
+        optimizer='adam',
         loss='binary_crossentropy',
-        metrics=['accuracy', 'Precision', 'Recall']
+        metrics=['accuracy']
     )
     return model
 
@@ -70,41 +38,44 @@ def build_model():
 def train_model(
         train_dataset,
         val_dataset,
-        epochs=100,
-        batch_size=32,
+        epochs=10,
+        batch_size=2,
         patience=5
         ):
-    es = keras.callbacks.EarlyStopping(
+    es = tf.keras.callbacks.EarlyStopping(
         monitor='val_loss',
         patience=patience,
         restore_best_weights=True,
         )
 
+    # Only load to cache batch n+1
+    AUTOTUNE = tf.data.AUTOTUNE
+    train_ds = train_dataset.cache().prefetch(buffer_size=AUTOTUNE)
+    val_ds = val_dataset.cache().prefetch(buffer_size=AUTOTUNE)
+
+
     model = build_model()
 
-    history = model.fit(
-        train_dataset,
+    print('✅ Model compiled \nFitting Model')
+
+    history = model.fit(train_ds,
         epochs=epochs,
         batch_size=batch_size,
-        validation_data=val_dataset,
-        callbacks=[es]
+        validation_data=val_ds,
+        callbacks=[es],
+        verbose=1
         )
 
-    accuracy = round(history.history['val_accuracy'][-1], 2)
-
-    date = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-
-    save_model(model, f"model_{accuracy}_{date}")
-
+    """ save_results() # Insert metrics saving here"""
     return model, history
 
 
 def evaluate_model(
-        model: Model,
+        model: tf.keras.Model,
         X: np.ndarray,
         y: np.ndarray,
         batch_size=64
-    ) -> Tuple[Model, dict]:
+    ) -> Tuple[tf.keras.Model, dict]:
     """
     Evaluate trained model performance on the dataset
     """
@@ -113,5 +84,7 @@ def evaluate_model(
     return None
 
 if __name__ == '__main__':
-    model = build_model()
-    print(model)
+    #import pdb; pdb.set_trace()
+    train_ds = load_images_from_bucket(BUCKET_IMAGES)
+    val_ds = load_images_from_bucket(BUCKET_IMAGES)
+    train_model(train_ds, val_ds)

@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import path, re_path
 from .views import *
 
 urlpatterns = [
-    path('', Prediction.as_view(), name = 'prediction'),
+    re_path(r'^faces/?$', Prediction.as_view(), name = 'faces prediction'),
+    re_path(r'^general/?$', Prediction.as_view(), name = 'general prediction'),
 ]
