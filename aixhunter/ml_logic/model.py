@@ -1,6 +1,4 @@
 import numpy as np
-import time
-import datetime
 from typing import Tuple
 from aixhunter.params import *
 import tensorflow as tf
@@ -8,8 +6,10 @@ import tensorflow as tf
 from aixhunter.ml_logic.data import load_images_from_bucket
 
 
+
+
 def load_model():
-    model = tf.keras.applications.ConvNeXtBase(
+    model = tf.keras.applications.ConvNeXtXLarge(
         include_top=False,
         weights="imagenet",
         input_shape=(200, 200, 3),
@@ -20,7 +20,6 @@ def load_model():
 
 def build_model():
     model = tf.keras.Sequential([
-        tf.keras.layers.Rescaling(1./255, input_shape=(200, 200, 3)),
         load_model(),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dense(256, activation='relu'),

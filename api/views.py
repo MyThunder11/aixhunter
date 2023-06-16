@@ -7,7 +7,6 @@ from aixhunter.interface_model.main import pred
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import base64
-import json
 import requests
 import validators
 
@@ -22,7 +21,6 @@ class Prediction(APIView):
         - A URL pointing to an image
         """
         # If the request contains an image file
-
         if 'file' in request.FILES:
             image = request.FILES.get('file')
             try:
@@ -32,7 +30,6 @@ class Prediction(APIView):
                 # Save the image locally
                 with open(path, 'wb') as saved_file:
                     saved_file.write(image.read())
-                print('image saved locally')
             except Exception as e:
                 # Return an error response if there's any exception
                 return Response({'error': str(e)}, status=400)
@@ -146,14 +143,16 @@ class Prediction(APIView):
         if 'faces' in request.path:
             model = ApiConfig.model_faces
             target_size = (256, 256)
+            threshold = 0.99
         elif 'general' in request.path:
             model = ApiConfig.model_general
             target_size = (200, 200)
+            threshold = 0.5
         else:
             return Response({'error': 'endpoint error'}, status=500)
         # Make a prediction using the model
         score = pred(model , image_url, target_size)
-        prediction = 1 if score >= 0.99 else 0
+        prediction = 1 if score >= threshold else 0
         response_dict = {"Prediction": prediction, "Score": score}
         print(response_dict)
         return Response(response_dict, status=200)
