@@ -9,8 +9,6 @@ from aixhunter.ml_logic.model import build_model
 
 def save_results(params: dict, metrics: dict) -> None:
     """
-    Persist params & metrics locally on the hard drive at
-    - (unit 03 only) if MODEL_TARGET='mlflow', also persist them on MLflow
     """
 
     pass
@@ -59,12 +57,12 @@ def load_latest_model(bucket: str = BUCKET_FACE_MODELS) -> tf.keras.Model:
     print(f'Latest {model_name} model to be used: {latest_model_name}')
     model_path = os.path.join(os.getcwd(), "models")
     model_file = os.path.join(model_path, latest_model_name)
-    lockfile = ".lock"
+    lockfile = f".lock-{model_name}"
     while True:
         if not os.path.isfile(model_file):
             print('Uploading latest model from gcs')
             with open(lockfile, 'w') as file:
-                file.write('')
+                file.write(str(time.time()))
             bucket = storage_client.bucket(model_bucket)
             blob = bucket.blob(latest_model_name)
             blob.download_to_filename(model_file)
@@ -73,6 +71,12 @@ def load_latest_model(bucket: str = BUCKET_FACE_MODELS) -> tf.keras.Model:
             break
         else:
             if os.path.isfile(lockfile):
+                with open(lockfile, 'r') as file:
+                    lockfile_timestamp = float(file.read())
+                    if time.time() - lockfile_timestamp > 600:
+                        print("Lockfile timeout, removing...")
+                        os.remove(lockfile)
+                        os.remove(model_file)
                 print("Lockfile exists, waiting...")
                 time.sleep(10)
             else:

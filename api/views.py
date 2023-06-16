@@ -21,7 +21,6 @@ class Prediction(APIView):
         - A URL pointing to an image
         """
         # If the request contains an image file
-
         if 'file' in request.FILES:
             image = request.FILES.get('file')
             try:
