@@ -64,8 +64,9 @@ def test_bad_url(url):
 
 
 if __name__ == '__main__':
-    urls = ['https://testing-fwbq4znlpq-od.a.run.app/api/faces', 'https://testing-fwbq4znlpq-od.a.run.app/api/general']
+    urls = ['https://production-fwbq4znlpq-od.a.run.app/api/faces', 'https://production-fwbq4znlpq-od.a.run.app/api/general']
     for url in urls:
+        print(url)
         print(post_img_test(url))
         print(post_b64_test(url))
         print(post_url(url))
