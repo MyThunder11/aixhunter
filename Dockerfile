@@ -17,4 +17,7 @@ RUN mkdir models
 RUN pip install .
 
 # run development server
-CMD ["gunicorn", "django_project.wsgi:application", "--workers", "1", "--bind", "0.0.0.0:8080", "--timeout", "1200"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8080", "--noreload"]
+
+# run server
+# CMD ["gunicorn", "--workers", "2", "--bind", "0.0.0.0:8080", "--threads", "8", "--timeout", "900", "--preload", "django_project.wsgi:application"]
